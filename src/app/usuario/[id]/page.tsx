@@ -17,6 +17,7 @@ import RenterReviews from "@/components/renter-reviews"
 import { ToastProvider, ToastViewport } from "@/components/ui/toast"
 import { useToast } from "@/hooks/use-toast"
 import { useParams } from "next/navigation"
+import Header from "@/components/ui/Header"
 
 interface RenterDetailsProps {
   params: {
@@ -171,6 +172,7 @@ export default function RenterDetails() {
 
   return (
     <ToastProvider>
+      <Header />
       <div className="container mx-auto py-8 px-4 max-w-4xl">
         <h1 className="text-2xl font-bold mb-6">Detalles del Arrendatario</h1>
 

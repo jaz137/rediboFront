@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 import { API_URL } from "@/utils/bakend"
 
@@ -30,15 +30,10 @@ export default function ReportProfileDialog({ children, renterId, renterName }: 
   const [additionalInfo, setAdditionalInfo] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
-  const { toast } = useToast()
 
   const handleSubmit = async () => {
     if (!reason) {
-      toast({
-        title: "Error",
-        description: "Por favor, seleccione un motivo para el reporte",
-        variant: "destructive",
-      })
+      toast.error("Por favor, seleccione un motivo para el reporte")
       return
     }
 
@@ -53,30 +48,30 @@ export default function ReportProfileDialog({ children, renterId, renterName }: 
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-        renterId,
-        renterName,
-        reason,
-        additionalInfo,
+          id_reportado: renterId,
+          motivo: reason,
+          informacion_adicional: additionalInfo,
         }),
       })
 
-      if (!response.ok) throw new Error("No se pudo enviar el reporte")
+      if (!response.ok) {
+        let errorMsg = "No se pudo enviar el reporte"
+        try {
+          const errorData = await response.json()
+          errorMsg = errorData?.error || errorMsg
+          console.error("Error al enviar el reporte:", errorData)
+        } catch (e) {
+          console.error("Error al parsear la respuesta de error:", e)
+        }
+        toast.error(errorMsg)
+        throw new Error(errorMsg)
+      }
 
-      toast({
-        title: "Reporte enviado",
-        description: "Su reporte ha sido enviado correctamente y será revisado por nuestro equipo.",
-      })
-
-      setReason("")
-      setAdditionalInfo("")
+      toast("Reporte enviado. Su reporte ha sido enviado correctamente y será revisado por nuestro equipo.")
       setIsOpen(false)
     } catch (error) {
       console.error("Error submitting report:", error)
-      toast({
-        title: "Error",
-        description: "No se pudo enviar el reporte. Intente nuevamente.",
-        variant: "destructive",
-      })
+      toast.error("No se pudo enviar el reporte. Intente nuevamente.")
     } finally {
       setIsSubmitting(false)
     }
